@@ -10,6 +10,7 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { UpdateCheboxTaskDto } from './dto/update-checkbox-task.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -33,6 +34,11 @@ export class TasksController {
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
     return this.tasksService.update(id, updateTaskDto);
+  }
+
+  @Patch()
+  updateAll(@Body() updateCheboxTaskDto: UpdateCheboxTaskDto) {
+    return this.tasksService.updateAllCheckbox(updateCheboxTaskDto);
   }
 
   @Delete(':id')

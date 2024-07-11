@@ -3,4 +3,5 @@ import { CreateTaskDto } from './create-task.dto';
 
 export class UpdateTaskDto extends PartialType(CreateTaskDto) {
   text: string;
+  isChecked: boolean;
 }

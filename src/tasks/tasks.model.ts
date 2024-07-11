@@ -11,13 +11,13 @@ interface TasksCreactionAttrs {
   text: string;
 }
 
-@Table({ tableName: 'tasks' })
+@Table({ tableName: 'Tasks' })
 export class Tasks extends Model<Tasks, TasksCreactionAttrs> {
   @Column({ type: DataType.STRING, allowNull: false })
   text: string;
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
-  onChecked: boolean;
+  isChecked: boolean;
 
   @CreatedAt
   createdAt: Date;
