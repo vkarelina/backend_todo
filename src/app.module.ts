@@ -3,6 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
 import { Dialect } from 'sequelize';
 import { TasksModule } from './tasks/tasks.module';
+import { Tasks } from './tasks/tasks.model';
 
 @Module({
   controllers: [],
@@ -18,8 +19,7 @@ import { TasksModule } from './tasks/tasks.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      models: [],
-      autoLoadModels: true, //для создания таблиц в бд
+      models: [Tasks],
     }),
     TasksModule,
   ],

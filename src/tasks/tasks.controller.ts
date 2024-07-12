@@ -26,11 +26,6 @@ export class TasksController {
     return this.tasksService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.tasksService.findOne(id);
-  }
-
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
     return this.tasksService.update(id, updateTaskDto);
@@ -44,5 +39,10 @@ export class TasksController {
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.tasksService.remove(id);
+  }
+
+  @Delete()
+  removeAll() {
+    return this.tasksService.removeAll();
   }
 }

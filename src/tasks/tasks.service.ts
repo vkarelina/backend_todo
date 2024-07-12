@@ -3,48 +3,48 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Tasks } from './tasks.model';
-import { response } from 'express';
 import { UpdateCheboxTaskDto } from './dto/update-checkbox-task.dto';
 
 @Injectable()
 export class TasksService {
   constructor(@InjectModel(Tasks) private taskRepository: typeof Tasks) {}
 
-  async create(dto: CreateTaskDto) {
-    const task = await this.taskRepository.create(dto);
-    return task;
+  create(dto: CreateTaskDto) {
+    try {
+      return this.taskRepository.create(dto);
+    } catch (e) {
+      return e.message;
+    }
   }
 
-  async findAll() {
-    const tasks = await this.taskRepository.findAll();
-    return tasks;
-  }
-
-  async findOne(id: number) {
-      const task = await this.taskRepository.findByPk(id);
-      if(!task) {
-        throw new HttpException(
-          'Tasks not found',
-          HttpStatus.NOT_FOUND,
-        )
-      }
-      return task;
+  findAll() {
+    try {
+      return this.taskRepository.findAll({order: [['id', 'ASC']]});
+    } catch (e) {
+      return e.message;
+    }
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto) {
     try {
       const task = await this.taskRepository.findByPk(id);
-      const taskUpdate = await task.update(updateTaskDto);
-      return taskUpdate;
-    } catch(e) {
+      const updateTask = task.update(updateTaskDto);
+      const allTasks = await this.taskRepository.findAll({
+        where: {isChecked: false}
+      })
+      if(allTasks.length === 0){
+        this.updateAllCheckbox({isChecked: true});
+      }
+      return updateTask;
+    } catch (e) {
       return e.message;
     }
   }
 
-  async updateAllCheckbox(updateCheboxTaskDto: UpdateCheboxTaskDto) {
-    await this.taskRepository.update(
-      {isChecked: updateCheboxTaskDto.isChecked},
-      {where: {isChecked: !updateCheboxTaskDto.isChecked}, returning: true},
+  updateAllCheckbox(updateCheboxTaskDto: UpdateCheboxTaskDto) {
+    this.taskRepository.update(
+      { isChecked: updateCheboxTaskDto.isChecked },
+      { where: { isChecked: !updateCheboxTaskDto.isChecked }},
     );
     return 'OK';
   }
@@ -52,8 +52,19 @@ export class TasksService {
   async remove(id: number) {
     try {
       const task = await this.taskRepository.findByPk(id);
-      await task.destroy();
-      return 'Successfully';
+      task.destroy();
+      return 'OK';
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  removeAll() {
+    try {
+      this.taskRepository.destroy({
+        where: { isChecked: true },
+      });
+      return 'OK';
     } catch (e) {
       return e.message;
     }
