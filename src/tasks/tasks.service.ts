@@ -47,8 +47,7 @@ export class TasksService {
       { where: { isChecked: !updateCheboxTaskDto.isChecked } },
     );
 
-    console.log(task);
-    if(task) {
+    if(Number(task) === 0) {
       throw new NotFoundException('Error: Not found todo for update');
     }
     
