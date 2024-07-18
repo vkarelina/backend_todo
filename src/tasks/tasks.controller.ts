@@ -25,15 +25,20 @@ export class TasksController {
   findAll() {
     return this.tasksService.findAll();
   }
+  
+  @Patch()
+  updateAll(@Body() updateCheboxTaskDto: UpdateCheboxTaskDto) {
+    return this.tasksService.updateAllCheckbox(updateCheboxTaskDto);
+  }
 
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
     return this.tasksService.update(id, updateTaskDto);
   }
-
-  @Patch()
-  updateAll(@Body() updateCheboxTaskDto: UpdateCheboxTaskDto) {
-    return this.tasksService.updateAllCheckbox(updateCheboxTaskDto);
+  
+  @Delete('delete')
+  removeAll() {
+    return this.tasksService.removeAll();
   }
 
   @Delete(':id')
@@ -41,8 +46,4 @@ export class TasksController {
     return this.tasksService.remove(id);
   }
 
-  @Delete()
-  removeAll() {
-    return this.tasksService.removeAll();
-  }
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -7,66 +7,74 @@ import { UpdateCheboxTaskDto } from './dto/update-checkbox-task.dto';
 
 @Injectable()
 export class TasksService {
-  constructor(@InjectModel(Tasks) private taskRepository: typeof Tasks) {}
+  constructor(@InjectModel(Tasks) private taskRepository: typeof Tasks) { }
 
-  create(dto: CreateTaskDto) {
-    try {
-      return this.taskRepository.create(dto);
-    } catch (e) {
-      return e.message;
+  async create(dto: CreateTaskDto) {
+    const task = await this.taskRepository.create(dto);
+
+    if (!task) {
+      throw new NotFoundException('Error: Not found todo');
     }
+
+    return task;
   }
 
-  findAll() {
-    try {
-      return this.taskRepository.findAll({order: [['id', 'ASC']]});
-    } catch (e) {
-      return e.message;
-    }
+  async findAll() {
+      const tasks = await this.taskRepository.findAll({
+        order: [['id', 'ASC']],
+      });
+
+      if(!tasks) {
+        throw new NotFoundException('Error: Not found todos');
+      }
+
+      return tasks;
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto) {
-    try {
       const task = await this.taskRepository.findByPk(id);
-      const updateTask = task.update(updateTaskDto);
-      const allTasks = await this.taskRepository.findAll({
-        where: {isChecked: false}
-      })
-      if(allTasks.length === 0){
-        this.updateAllCheckbox({isChecked: true});
+
+      if(!task) {
+        throw new NotFoundException('Error: Not found todo');
       }
+      
+      const updateTask = task.update(updateTaskDto);
       return updateTask;
-    } catch (e) {
-      return e.message;
-    }
   }
 
-  updateAllCheckbox(updateCheboxTaskDto: UpdateCheboxTaskDto) {
-    this.taskRepository.update(
+  async updateAllCheckbox(updateCheboxTaskDto: UpdateCheboxTaskDto) {
+    const task = await this.taskRepository.update(
       { isChecked: updateCheboxTaskDto.isChecked },
-      { where: { isChecked: !updateCheboxTaskDto.isChecked }},
+      { where: { isChecked: !updateCheboxTaskDto.isChecked } },
     );
-    return 'OK';
+
+    if(!task) {
+      throw new NotFoundException('Error: Not found todo for update');
+    }
+    
+    return { success: 'OK' };
   }
 
   async remove(id: number) {
-    try {
       const task = await this.taskRepository.findByPk(id);
+
+      if(!task) {
+        throw new NotFoundException('Error: Not found todo');
+      }
+
       task.destroy();
-      return 'OK';
-    } catch (e) {
-      return e.message;
-    }
+      return { success: 'OK' };
   }
 
-  removeAll() {
-    try {
-      this.taskRepository.destroy({
+  async removeAll() {
+      const tasks = await this.taskRepository.destroy({
         where: { isChecked: true },
       });
-      return 'OK';
-    } catch (e) {
-      return e.message;
-    }
+
+      if(!tasks) {
+        throw new NotFoundException('Error: Not found todos');
+      }
+
+      return { success: 'OK' };
   }
 }
