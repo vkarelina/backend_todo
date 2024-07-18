@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -38,8 +38,7 @@ export class TasksService {
         throw new NotFoundException('Error: Not found todo');
       }
       
-      const updateTask = task.update(updateTaskDto);
-      return updateTask;
+      return await task.update(updateTaskDto);
   }
 
   async updateAllCheckbox(updateCheboxTaskDto: UpdateCheboxTaskDto) {
@@ -48,11 +47,12 @@ export class TasksService {
       { where: { isChecked: !updateCheboxTaskDto.isChecked } },
     );
 
-    if(!task) {
+    console.log(task);
+    if(task) {
       throw new NotFoundException('Error: Not found todo for update');
     }
     
-    return { success: 'OK' };
+    return { status: 'OK' };
   }
 
   async remove(id: number) {
@@ -63,7 +63,7 @@ export class TasksService {
       }
 
       task.destroy();
-      return { success: 'OK' };
+      return { status: 'OK' };
   }
 
   async removeAll() {
@@ -75,6 +75,6 @@ export class TasksService {
         throw new NotFoundException('Error: Not found todos');
       }
 
-      return { success: 'OK' };
+      return { status: 'OK' };
   }
 }
